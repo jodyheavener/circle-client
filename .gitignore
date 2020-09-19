@@ -1,0 +1,19 @@
+# Dependency directory
+node_modules
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore built ts files
+dist
+
+# CircleCI local config
+.circleci/local.yml

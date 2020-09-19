@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "lib": [
+      "es2019",
+      "es7",
+      "es6",
+      "dom"
+    ],
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "dist"
+  ]
+}
