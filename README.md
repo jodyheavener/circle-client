@@ -8,7 +8,7 @@ A Node client for CircleCI [v2 API](https://circleci.com/docs/api/v2/).
 
 First, go and get a CircleCI [API Token](https://app.circleci.com/settings/user/tokens).
 
-Then all you need to do is import the client class and instantiate it with your token and optionally a project slug:
+Then all you need to do is import the client class and instantiate it with your token and optionally a project slug and default branch:
 
 ```ts
 import CircleCI from 'circleci';
@@ -16,7 +16,9 @@ import CircleCI from 'circleci';
 const client = new CircleCI(
   '2c818264d2557cd14b9fc3fa538df6ecbc6489f3',
   // this could also be "github/owner/repo"
-  ['github', 'owner', 'repo']
+  ['github', 'owner', 'repo'],
+  // methods that take a branch arg can override this
+  'main'
 );
 ```
 

@@ -210,7 +210,8 @@ class CircleCI {
 
   constructor(
     private readonly apiKey: string,
-    public projectSlug?: ProjectSlug | string
+    public projectSlug?: ProjectSlug | string,
+    public branch?: string
   ) {}
 
   private async request(
@@ -501,8 +502,8 @@ class CircleCI {
     if (pageToken) {
       params['page-token'] = pageToken;
     }
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
 
     const data = await this.request(
@@ -532,8 +533,8 @@ class CircleCI {
     if (pageToken) {
       params['page-token'] = pageToken;
     }
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
 
     const data = await this.request(
@@ -567,8 +568,8 @@ class CircleCI {
     if (pageToken) {
       params['page-token'] = pageToken;
     }
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
     if (startDate) {
       params['start-date'] = startDate;
@@ -609,8 +610,8 @@ class CircleCI {
     if (pageToken) {
       params['page-token'] = pageToken;
     }
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
     if (startDate) {
       params['start-date'] = startDate;
@@ -723,8 +724,8 @@ class CircleCI {
     parameters?: { [key: string]: string | number | boolean };
   }): Promise<PipelineConfig> {
     const params: Params = {};
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
     if (tag) {
       params['tag'] = tag;
@@ -757,8 +758,8 @@ class CircleCI {
     if (pageToken) {
       params['page-token'] = pageToken;
     }
-    if (branch) {
-      params['branch'] = branch;
+    if (branch || this.branch) {
+      params['branch'] = branch || this.branch!;
     }
 
     const data = await this.request(
