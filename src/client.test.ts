@@ -545,7 +545,7 @@ describe('getProjectPipeline', () => {
 describe('previews', () => {
   beforeAll(() => {
     global.console.warn = jest.fn();
-  })
+  });
 
   describe('getJob', () => {
     it('constructs request with the correct arguments', async () => {
@@ -590,4 +590,29 @@ describe('previews', () => {
       );
     });
   });
-})
+
+  describe('getMe', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.getMe();
+      expectFetch(HTTPMethod.Get, `me`);
+    });
+  });
+
+  describe('getCollaborations', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.getCollaborations();
+      expectFetch(HTTPMethod.Get, `me/collaborations`);
+    });
+  });
+
+  describe('getUser', () => {
+    it('constructs request with the correct arguments', async () => {
+      const userId = 'bad-day';
+      mockFetch();
+      await client.getUser(userId);
+      expectFetch(HTTPMethod.Get, `user/${userId}`);
+    });
+  });
+});

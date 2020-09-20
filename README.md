@@ -40,6 +40,14 @@ Below is a summary list of available methods. Check out the main [client file](.
 - `listWorkflowJobMetrics` - Get summary metrics for a project workflow's jobs.
 - `listWorkflowJobRuns` - Get recent runs of a job within a workflow.
 
+#### User [🔗](https://circleci.com/docs/api/v2/#tag/User)
+
+🚧 This set of endpoints are listed as Preview and may change without warning.
+
+- `getMe` - Information about the user that is currently signed in.
+- `getCollaborations` - Provides the set of organizations of which the currently signed in user is a member or a collaborator.
+- `getUser` - Information about the user with the given ID.
+
 #### Pipeline [🔗](https://circleci.com/docs/api/v2/#tag/Pipeline)
 
 - `listPipelines` - Returns all pipelines for the most recently built projects you follow in an organization.
@@ -112,6 +120,6 @@ Run the CircleCI test job locally:
 - [x] Base v2 API support
 - [ ] Additional endpoint methods (once out of Preview)
   - [ ] Context
-  - [ ] User
+  - [x] User
   - [x] Job
 - [ ] Add artifact download capabilities

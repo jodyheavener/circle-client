@@ -43,11 +43,11 @@ export type ErrorResponse = {
 
 export type Params = {
   [value: string]:
-  | string
-  | number
-  | boolean
-  | string[]
-  | { [key: string]: string | number | boolean };
+    | string
+    | number
+    | boolean
+    | string[]
+    | { [key: string]: string | number | boolean };
 };
 
 export type ProjectSlug = [
@@ -167,13 +167,13 @@ export type JobDetail = {
   };
   queued_at: string;
   stopped_at?: string;
-}
+};
 
 export type JobArtifact = {
   path: string;
   node_index: number;
   url: string;
-}
+};
 
 export type JobTest = {
   message: string;
@@ -183,7 +183,7 @@ export type JobTest = {
   result: string;
   name: string;
   classname: string;
-}
+};
 
 export type WorkflowRun = {
   id: string;
@@ -247,6 +247,18 @@ export type CheckoutKey = {
   'created-at': string;
 };
 
+export type User = {
+  id: string;
+  login: string;
+  name: string;
+};
+
+export type Collaboration = {
+  'vcs-type': string;
+  name: string;
+  avatar_url: string;
+};
+
 export class ProjectSlugError extends Error {
   constructor() {
     super('A project slug is required to call this method');
@@ -273,7 +285,7 @@ class CircleCI {
     private readonly apiKey: string,
     public projectSlug?: ProjectSlug | string,
     public branch?: string
-  ) { }
+  ) {}
 
   private async request(
     method: HTTPMethod,
@@ -323,7 +335,9 @@ class CircleCI {
       return;
     }
 
-    console.warn('Warning: you are using a preview API endpoint that may change without warning.')
+    console.warn(
+      'Warning: you are using a preview API endpoint that may change without warning.'
+    );
     this.previewWarned = true;
   }
 
@@ -910,7 +924,9 @@ class CircleCI {
   /**
    * Returns a job's artifacts.
    */
-  async listJobArtifacts(jobNumber: string | number): Promise<Paged<JobArtifact>> {
+  async listJobArtifacts(
+    jobNumber: string | number
+  ): Promise<Paged<JobArtifact>> {
     this.previewWarn();
 
     const data = await this.request(
@@ -935,6 +951,40 @@ class CircleCI {
     );
 
     return data as Paged<JobTest>;
+  }
+
+  /**
+   * Information about the user that is currently signed in.
+   */
+  async getMe(): Promise<User> {
+    this.previewWarn();
+
+    const data = await this.request(HTTPMethod.Get, `me`, 200);
+
+    return data as User;
+  }
+
+  /**
+   * Provides the set of organizations of which the currently
+   * signed in user is a member or a collaborator.
+   */
+  async getCollaborations(): Promise<Collaboration[]> {
+    this.previewWarn();
+
+    const data = await this.request(HTTPMethod.Get, `me/collaborations`, 200);
+
+    return data as Collaboration[];
+  }
+
+  /**
+   * Information about the user with the given ID.
+   */
+  async getUser(userId: string): Promise<User> {
+    this.previewWarn();
+
+    const data = await this.request(HTTPMethod.Get, `user/${userId}`, 200);
+
+    return data as User;
   }
 }
 
