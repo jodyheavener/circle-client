@@ -20,6 +20,7 @@ const branch = 'pan-and-broom';
 const startDate = '2019-08-24T14:15:22Z';
 const endDate = '2019-08-24T14:15:22Z';
 const sshFingerprint = 'the-grocery';
+const jobNumber = 82;
 
 const fetchMock = fetch as FetchMock;
 function mockFetch(status = 200, body = {}) {
@@ -540,3 +541,53 @@ describe('getProjectPipeline', () => {
     );
   });
 });
+
+describe('previews', () => {
+  beforeAll(() => {
+    global.console.warn = jest.fn();
+  })
+
+  describe('getJob', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.getJob(jobNumber);
+      expectFetch(
+        HTTPMethod.Get,
+        `project/${client.getProjectSlug()}/job/${jobNumber}`
+      );
+    });
+  });
+
+  describe('cancelJob', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch(202);
+      await client.cancelJob(jobNumber);
+      expectFetch(
+        HTTPMethod.Post,
+        `project/${client.getProjectSlug()}/job/${jobNumber}/cancel`
+      );
+    });
+  });
+
+  describe('listJobArtifacts', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.listJobArtifacts(jobNumber);
+      expectFetch(
+        HTTPMethod.Get,
+        `project/${client.getProjectSlug()}/${jobNumber}/artifacts`
+      );
+    });
+  });
+
+  describe('listJobTests', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.listJobTests(jobNumber);
+      expectFetch(
+        HTTPMethod.Get,
+        `project/${client.getProjectSlug()}/${jobNumber}/tests`
+      );
+    });
+  });
+})

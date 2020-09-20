@@ -43,11 +43,11 @@ export type ErrorResponse = {
 
 export type Params = {
   [value: string]:
-    | string
-    | number
-    | boolean
-    | string[]
-    | { [key: string]: string | number | boolean };
+  | string
+  | number
+  | boolean
+  | string[]
+  | { [key: string]: string | number | boolean };
 };
 
 export type ProjectSlug = [
@@ -124,6 +124,66 @@ export type Job = {
   stopped_at?: string;
   approval_request_id?: string;
 };
+
+export type JobDetail = {
+  web_url: string;
+  project: {
+    slug: string;
+    name: string;
+    external_url: string;
+  };
+  parallel_runs: {
+    index: number;
+    status: string;
+  }[];
+  started_at: string;
+  latest_workflow: {
+    id: string;
+    name: string;
+  };
+  name: string;
+  executor: {
+    type: string;
+    resource_class: string;
+  };
+  parallelism: number;
+  status: string;
+  number: number;
+  pipeline: {
+    id: string;
+  };
+  duration: number;
+  created_at: string;
+  messages: {
+    type: string;
+    message: string;
+    reason?: string;
+  }[];
+  contexts: {
+    name: string;
+  }[];
+  organization: {
+    name: string;
+  };
+  queued_at: string;
+  stopped_at?: string;
+}
+
+export type JobArtifact = {
+  path: string;
+  node_index: number;
+  url: string;
+}
+
+export type JobTest = {
+  message: string;
+  source: string;
+  run_time: string;
+  file: string;
+  result: string;
+  name: string;
+  classname: string;
+}
 
 export type WorkflowRun = {
   id: string;
@@ -207,12 +267,13 @@ export class APIError extends Error {
 
 class CircleCI {
   static readonly baseUrl: string = 'https://circleci.com/api/v2';
+  private previewWarned = false;
 
   constructor(
     private readonly apiKey: string,
     public projectSlug?: ProjectSlug | string,
     public branch?: string
-  ) {}
+  ) { }
 
   private async request(
     method: HTTPMethod,
@@ -255,6 +316,15 @@ class CircleCI {
     }
 
     return data as { [value: string]: any };
+  }
+
+  private previewWarn(): void {
+    if (this.previewWarned) {
+      return;
+    }
+
+    console.warn('Warning: you are using a preview API endpoint that may change without warning.')
+    this.previewWarned = true;
   }
 
   getProjectSlug(): string {
@@ -799,7 +869,7 @@ class CircleCI {
   /**
    * Returns a pipeline by number.
    */
-  async getProjectPipeline(pipelineNumber: string): Promise<Pipeline> {
+  async getProjectPipeline(pipelineNumber: string | number): Promise<Pipeline> {
     const data = await this.request(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/pipeline/${pipelineNumber}`,
@@ -807,6 +877,64 @@ class CircleCI {
     );
 
     return data as Pipeline;
+  }
+
+  /**
+   * Returns job details.
+   */
+  async getJob(jobNumber: string | number): Promise<JobDetail> {
+    this.previewWarn();
+
+    const data = await this.request(
+      HTTPMethod.Get,
+      `project/${this.getProjectSlug()}/job/${jobNumber}`,
+      200
+    );
+
+    return data as JobDetail;
+  }
+
+  /**
+   * Cancel job with a given job number.
+   */
+  async cancelJob(jobNumber: string | number): Promise<void> {
+    this.previewWarn();
+
+    await this.request(
+      HTTPMethod.Post,
+      `project/${this.getProjectSlug()}/job/${jobNumber}/cancel`,
+      202
+    );
+  }
+
+  /**
+   * Returns a job's artifacts.
+   */
+  async listJobArtifacts(jobNumber: string | number): Promise<Paged<JobArtifact>> {
+    this.previewWarn();
+
+    const data = await this.request(
+      HTTPMethod.Get,
+      `project/${this.getProjectSlug()}/${jobNumber}/artifacts`,
+      200
+    );
+
+    return data as Paged<JobArtifact>;
+  }
+
+  /**
+   * Get test metadata for a build.
+   */
+  async listJobTests(jobNumber: string | number): Promise<Paged<JobTest>> {
+    this.previewWarn();
+
+    const data = await this.request(
+      HTTPMethod.Get,
+      `project/${this.getProjectSlug()}/${jobNumber}/tests`,
+      200
+    );
+
+    return data as Paged<JobTest>;
   }
 }
 

@@ -51,6 +51,15 @@ Below is a summary list of available methods. Check out the main [client file](.
 - `listOwnProjectPipelines` - Returns a sequence of all pipelines for this project triggered by the user.
 - `getProjectPipeline` - Returns a pipeline by number.
 
+#### Job [🔗](https://circleci.com/docs/api/v2/#tag/Job)
+
+🚧 This set of endpoints are listed as Preview and may change without warning.
+
+- `getJob` - Returns job details.
+- `cancelJob` - Cancel job with a given job number.
+- `listJobArtifacts` - Returns a job's artifacts.
+- `listJobTests` - Get test metadata for a build.
+
 #### Workflow [🔗](https://circleci.com/docs/api/v2/#tag/Workflow)
 
 - `getWorkflow` - Returns summary fields of a workflow by ID.
@@ -104,5 +113,5 @@ Run the CircleCI test job locally:
 - [ ] Additional endpoint methods (once out of Preview)
   - [ ] Context
   - [ ] User
-  - [ ] Job
+  - [x] Job
 - [ ] Add artifact download capabilities
