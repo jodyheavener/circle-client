@@ -1,6 +1,7 @@
 import { FetchMock } from 'jest-fetch-mock';
 import CircleCI, {
   APIError,
+  ArgumentError,
   HTTPMethod,
   Params,
   ProjectSlug,
@@ -21,6 +22,7 @@ const startDate = '2019-08-24T14:15:22Z';
 const endDate = '2019-08-24T14:15:22Z';
 const sshFingerprint = 'the-grocery';
 const jobNumber = 82;
+const contextId = 'colly-strings';
 
 const fetchMock = fetch as FetchMock;
 function mockFetch(status = 200, body = {}) {
@@ -613,6 +615,138 @@ describe('previews', () => {
       mockFetch();
       await client.getUser(userId);
       expectFetch(HTTPMethod.Get, `user/${userId}`);
+    });
+  });
+
+  describe('listContexts', () => {
+    const ownerId = 'bad-day';
+    const ownerSlug = 'everyone-blooms';
+
+    it('constructs a request with the correct owner-id arguments', async () => {
+      mockFetch();
+      await client.listContexts({
+        ownerId,
+        ownerType: 'account',
+      });
+      expectFetch(
+        HTTPMethod.Get,
+        `context?owner-id=${ownerId}&owner-type=account`
+      );
+    });
+
+    it('constructs a request with the correct owner-slug arguments', async () => {
+      mockFetch();
+      await client.listContexts({
+        ownerSlug,
+        ownerType: 'account',
+      });
+      expectFetch(
+        HTTPMethod.Get,
+        `context?owner-slug=${ownerSlug}&owner-type=account`
+      );
+    });
+
+    it('requires owner-id or owner-slug arguments', async () => {
+      try {
+        await client.listContexts({});
+      } catch (error) {
+        expect(error).toBeInstanceOf(ArgumentError);
+      }
+    });
+
+    it('cannot have owner-id and owner-slug arguments', async () => {
+      try {
+        await client.listContexts({ ownerId, ownerSlug });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ArgumentError);
+      }
+    });
+
+    it('can specify a page token', async () => {
+      mockFetch();
+      await client.listContexts({
+        pageToken,
+        ownerSlug,
+        ownerType: 'account',
+      });
+      expectFetch(
+        HTTPMethod.Get,
+        `context?page-token=${pageToken}&owner-slug=${ownerSlug}&owner-type=account`
+      );
+    });
+  });
+
+  describe('createContext', () => {
+    it('constructs request with the correct arguments', async () => {
+      const contextName = 'fairbanks-alaska';
+      const ownerId = 'persona-non-grata';
+      mockFetch(200);
+      await client.createContext(contextName, {
+        id: ownerId,
+        type: 'organization',
+      });
+      expectFetch(HTTPMethod.Post, `context`, {
+        name: contextName,
+        owner: { id: ownerId, type: 'organization' },
+      });
+    });
+  });
+
+  describe('deleteContext', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.deleteContext(contextId);
+      expectFetch(HTTPMethod.Delete, `context/${contextId}`);
+    });
+  });
+
+  describe('getContext', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.getContext(contextId);
+      expectFetch(HTTPMethod.Get, `context/${contextId}`);
+    });
+  });
+
+  describe('listContextEnvVars', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.listContextEnvVars(contextId);
+      expectFetch(HTTPMethod.Get, `context/${contextId}/environment-variable`);
+    });
+
+    it('can specify a page token', async () => {
+      mockFetch();
+      await client.listContextEnvVars(contextId, {
+        pageToken,
+      });
+      expectFetch(
+        HTTPMethod.Get,
+        `context/${contextId}/environment-variable?page-token=${pageToken}`
+      );
+    });
+  });
+
+  describe('createContextEnvVar', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.createContextEnvVar(contextId, envVarName, envVarValue);
+      expectFetch(
+        HTTPMethod.Put,
+        `context/${contextId}/environment-variable/${envVarName}`,
+        { value: envVarValue }
+      );
+    });
+  });
+
+  describe('deleteContextEnvVar', () => {
+    it('constructs request with the correct arguments', async () => {
+      mockFetch();
+      await client.deleteContextEnvVar(contextId, envVarName);
+      expectFetch(
+        HTTPMethod.Delete,
+        `context/${contextId}/environment-variable/${envVarName}`
+      );
     });
   });
 });

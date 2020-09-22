@@ -42,12 +42,7 @@ export type ErrorResponse = {
 };
 
 export type Params = {
-  [value: string]:
-    | string
-    | number
-    | boolean
-    | string[]
-    | { [key: string]: string | number | boolean };
+  [value: string]: any;
 };
 
 export type ProjectSlug = [
@@ -258,6 +253,25 @@ export type Collaboration = {
   name: string;
   avatar_url: string;
 };
+
+export type Context = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type ContextEnvVar = {
+  variable: string;
+  created_at: string;
+  context_id: string;
+};
+
+export class ArgumentError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ArgumentError';
+  }
+}
 
 export class ProjectSlugError extends Error {
   constructor() {
@@ -985,6 +999,140 @@ class CircleCI {
     const data = await this.request(HTTPMethod.Get, `user/${userId}`, 200);
 
     return data as User;
+  }
+
+  /**
+   * List all contexts for an owner.
+   */
+  async listContexts({
+    ownerId,
+    ownerSlug,
+    ownerType,
+    pageToken,
+  }: {
+    ownerId?: string;
+    ownerSlug?: string;
+    ownerType?: 'account' | 'organization';
+    pageToken?: string;
+  }): Promise<Paged<Context>> {
+    this.previewWarn();
+
+    if ((!ownerId && !ownerSlug) || (ownerId && ownerSlug)) {
+      throw new ArgumentError('One of ownerId or ownerSlug must be supplied');
+    }
+
+    const params: Params = {};
+    if (pageToken) {
+      params['page-token'] = pageToken;
+    }
+    if (ownerId) {
+      params['owner-id'] = ownerId;
+    }
+    if (ownerSlug) {
+      params['owner-slug'] = ownerSlug;
+    }
+    if (ownerType) {
+      params['owner-type'] = ownerType;
+    }
+
+    const data = await this.request(HTTPMethod.Get, `context`, 200, params);
+
+    return data as Paged<Context>;
+  }
+
+  /**
+   * Create a new context.
+   */
+  async createContext(
+    name: string,
+    owner: { id: string; type?: 'account' | 'organization' }
+  ): Promise<Context> {
+    const data = await this.request(HTTPMethod.Post, `context`, 200, {
+      name,
+      owner,
+    });
+
+    return data as Context;
+  }
+
+  /**
+   * Delete a context.
+   */
+  async deleteContext(contextId: string): Promise<void> {
+    await this.request(HTTPMethod.Delete, `context/${contextId}`, 200);
+  }
+
+  /**
+   * Returns basic information about a context.
+   */
+  async getContext(contextId: string): Promise<Context> {
+    this.previewWarn();
+
+    const data = await this.request(
+      HTTPMethod.Get,
+      `context/${contextId}`,
+      200
+    );
+
+    return data as Context;
+  }
+
+  /**
+   * List information about environment variables in a context,
+   * not including their values.
+   */
+  async listContextEnvVars(
+    contextId: string,
+    {
+      pageToken,
+    }: {
+      pageToken?: string;
+    } = {}
+  ): Promise<Paged<ContextEnvVar>> {
+    const params: Params = {};
+    if (pageToken) {
+      params['page-token'] = pageToken;
+    }
+
+    const data = await this.request(
+      HTTPMethod.Get,
+      `context/${contextId}/environment-variable`,
+      200,
+      params
+    );
+
+    return data as Paged<ContextEnvVar>;
+  }
+
+  /**
+   * Create or update an environment variable within a context.
+   */
+  async createContextEnvVar(
+    contextId: string,
+    name: string,
+    value: string
+  ): Promise<EnvVar> {
+    const data = await this.request(
+      HTTPMethod.Put,
+      `context/${contextId}/environment-variable/${name}`,
+      200,
+      {
+        value,
+      }
+    );
+
+    return data as EnvVar;
+  }
+
+  /**
+   * Delete an environment variable from a context.
+   */
+  async deleteContextEnvVar(contextId: string, name: string): Promise<void> {
+    await this.request(
+      HTTPMethod.Delete,
+      `context/${contextId}/environment-variable/${name}`,
+      200
+    );
   }
 }
 
