@@ -1,6 +1,6 @@
-# CircleCI for Node
+# CircleCI JS Client
 
-A Node client for CircleCI [v2 API](https://circleci.com/docs/api/v2/).
+A JavaScript client for CircleCI's [v2 API](https://circleci.com/docs/api/v2/).
 
 ## Usage
 
@@ -11,7 +11,7 @@ First, go and get a CircleCI [API Token](https://app.circleci.com/settings/user/
 Then all you need to do is import the client class and instantiate it with your token and optionally a project slug and default branch:
 
 ```ts
-import CircleCI from 'circleci';
+import CircleCI from 'circle-client';
 
 const client = new CircleCI(
   '2c818264d2557cd14b9fc3fa538df6ecbc6489f3',

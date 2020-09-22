@@ -1,7 +1,7 @@
 {
-  "name": "circleci-node",
+  "name": "circle-client",
   "version": "0.1.2",
-  "description": "A Node client for CircleCI v2 API",
+  "description": "A JavaScript client for CircleCI v2 API",
   "main": "dist/client.js",
   "types": "dist/client.d.ts",
   "engines": {
@@ -9,13 +9,13 @@
   },
   "author": "Jody Heavener <j.heavener@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/jodyheavener/circleci-node",
+  "homepage": "https://github.com/jodyheavener/circle-client",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jodyheavener/circleci-node.git"
+    "url": "git+https://github.com/jodyheavener/circle-client.git"
   },
   "bugs": {
-    "url": "https://github.com/jodyheavener/circleci-node/issues"
+    "url": "https://github.com/jodyheavener/circle-client/issues"
   },
   "keywords": [
     "circleci",
