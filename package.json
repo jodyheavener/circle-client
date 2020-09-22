@@ -33,12 +33,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "isomorphic-fetch": "^2.2.1"
   },
   "devDependencies": {
+    "@types/isomorphic-fetch": "^0.0.35",
     "@types/jest": "^26.0.14",
     "@types/node": "^14.11.1",
-    "@types/node-fetch": "^2.5.7",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
     "eslint": "^7.9.0",

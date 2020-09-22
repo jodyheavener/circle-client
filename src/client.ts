@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch';
+import fetch from 'isomorphic-fetch';
 
 export enum WorkflowStatus {
   Success = 'success',
