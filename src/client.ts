@@ -302,7 +302,7 @@ class CircleCI {
 
   constructor(
     private readonly apiKey: string,
-    public projectSlug: ProjectSlug | string | undefined,
+    public projectSlug?: ProjectSlug | string,
     {
       branch,
       headers = {},
