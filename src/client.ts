@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import pck from '../package.json';
 
 export enum WorkflowStatus {
   Success = 'success',
@@ -32,7 +33,7 @@ export enum HTTPMethod {
   Delete = 'delete',
 }
 
-type Paged<T> = {
+export type Paged<T> = {
   items: T[];
   next_page_token: string | null;
 };
@@ -291,15 +292,28 @@ export class APIError extends Error {
   }
 }
 
+type Headers = { [header: string]: string };
+
 class CircleCI {
   static readonly baseUrl: string = 'https://circleci.com/api/v2';
   private previewWarned = false;
+  private branch?: string;
+  private headers: Headers = {};
 
   constructor(
     private readonly apiKey: string,
-    public projectSlug?: ProjectSlug | string,
-    public branch?: string
-  ) {}
+    public projectSlug: ProjectSlug | string | undefined,
+    {
+      branch,
+      headers = {},
+    }: {
+      branch?: string;
+      headers?: Headers;
+    } = {}
+  ) {
+    this.branch = branch;
+    this.headers = headers;
+  }
 
   private async request(
     method: HTTPMethod,
@@ -309,9 +323,10 @@ class CircleCI {
   ): Promise<{ [value: string]: any }> {
     let fullPath = `${CircleCI.baseUrl}/${path}`;
     let body: string | undefined = undefined;
-    let headers: { [header: string]: string } = {
+    let headers: Headers = Object.assign(this.headers, {
       'Circle-Token': this.apiKey,
-    };
+      'X-Circle-Client': `v${pck.version}`,
+    });
 
     if (params && Object.keys(params).length) {
       if ([HTTPMethod.Get, HTTPMethod.Delete].includes(method)) {
@@ -383,11 +398,21 @@ class CircleCI {
   /**
    * Returns a sequence of checkout keys for the project.
    */
-  async listCheckoutKeys(): Promise<Paged<CheckoutKey>> {
+  async listCheckoutKeys({
+    pageToken,
+  }: {
+    pageToken?: string;
+  } = {}): Promise<Paged<CheckoutKey>> {
+    const params: Params = {};
+    if (pageToken) {
+      params['page-token'] = pageToken;
+    }
+
     const data = await this.request(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/checkout-key`,
-      200
+      200,
+      params
     );
 
     return data as Paged<CheckoutKey>;
@@ -939,14 +964,25 @@ class CircleCI {
    * Returns a job's artifacts.
    */
   async listJobArtifacts(
-    jobNumber: string | number
+    jobNumber: string | number,
+    {
+      pageToken,
+    }: {
+      pageToken?: string;
+    } = {}
   ): Promise<Paged<JobArtifact>> {
     this.previewWarn();
+
+    const params: Params = {};
+    if (pageToken) {
+      params['page-token'] = pageToken;
+    }
 
     const data = await this.request(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/${jobNumber}/artifacts`,
-      200
+      200,
+      params
     );
 
     return data as Paged<JobArtifact>;
@@ -955,13 +991,26 @@ class CircleCI {
   /**
    * Get test metadata for a build.
    */
-  async listJobTests(jobNumber: string | number): Promise<Paged<JobTest>> {
+  async listJobTests(
+    jobNumber: string | number,
+    {
+      pageToken,
+    }: {
+      pageToken?: string;
+    } = {}
+  ): Promise<Paged<JobTest>> {
     this.previewWarn();
+
+    const params: Params = {};
+    if (pageToken) {
+      params['page-token'] = pageToken;
+    }
 
     const data = await this.request(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/${jobNumber}/tests`,
-      200
+      200,
+      params
     );
 
     return data as Paged<JobTest>;

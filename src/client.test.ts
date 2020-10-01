@@ -1,3 +1,4 @@
+import pck from '../package.json';
 import { FetchMock } from 'jest-fetch-mock';
 import CircleCI, {
   APIError,
@@ -37,12 +38,17 @@ function expectFetch(
 ) {
   expect(fetch).toHaveBeenCalledWith(`${CircleCI.baseUrl}/${path}`, {
     method,
-    headers: Object.assign(
-      { 'Circle-Token': apiKey },
-      [HTTPMethod.Post, HTTPMethod.Put].includes(method) && body
-        ? { 'Content-Type': 'application/json' }
-        : {},
-      headers
+    headers: expect.objectContaining(
+      Object.assign(
+        {
+          'Circle-Token': apiKey,
+          'X-Circle-Client': `v${pck.version}`,
+        },
+        [HTTPMethod.Post, HTTPMethod.Put].includes(method) && body
+          ? { 'Content-Type': 'application/json' }
+          : {},
+        headers
+      )
     ),
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -96,6 +102,15 @@ describe('listCheckoutKeys', () => {
     expectFetch(
       HTTPMethod.Get,
       `project/${client.getProjectSlug()}/checkout-key`
+    );
+  });
+
+  it('can specify a page token', async () => {
+    mockFetch();
+    await client.listCheckoutKeys({ pageToken });
+    expectFetch(
+      HTTPMethod.Get,
+      `project/${client.getProjectSlug()}/checkout-key?page-token=${pageToken}`
     );
   });
 });
@@ -580,6 +595,15 @@ describe('previews', () => {
         `project/${client.getProjectSlug()}/${jobNumber}/artifacts`
       );
     });
+
+    it('can specify a page token', async () => {
+      mockFetch();
+      await client.listJobArtifacts(jobNumber, { pageToken });
+      expectFetch(
+        HTTPMethod.Get,
+        `project/${client.getProjectSlug()}/${jobNumber}/artifacts?page-token=${pageToken}`
+      );
+    });
   });
 
   describe('listJobTests', () => {
@@ -589,6 +613,15 @@ describe('previews', () => {
       expectFetch(
         HTTPMethod.Get,
         `project/${client.getProjectSlug()}/${jobNumber}/tests`
+      );
+    });
+
+    it('can specify a page token', async () => {
+      mockFetch();
+      await client.listJobTests(jobNumber, { pageToken });
+      expectFetch(
+        HTTPMethod.Get,
+        `project/${client.getProjectSlug()}/${jobNumber}/tests?page-token=${pageToken}`
       );
     });
   });

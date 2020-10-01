@@ -17,8 +17,10 @@ const client = new CircleCI(
   '2c818264d2557cd14b9fc3fa538df6ecbc6489f3',
   // this could also be "github/owner/repo"
   ['github', 'owner', 'repo'],
-  // methods that take a branch arg can override this
-  'main'
+  {
+    // methods that take a branch arg can override this
+    branch: 'main',
+  }
 );
 ```
 

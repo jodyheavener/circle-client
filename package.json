@@ -2,8 +2,8 @@
   "name": "circle-client",
   "version": "0.1.3",
   "description": "A JavaScript client for CircleCI v2 API",
-  "main": "dist/client.js",
-  "types": "dist/client.d.ts",
+  "main": "dist/src/client.js",
+  "types": "dist/src/client.d.ts",
   "engines": {
     "node": ">=12.18.2"
   },
