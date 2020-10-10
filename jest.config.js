@@ -8,4 +8,5 @@ module.exports = {
   },
   verbose: true,
   setupFiles: ['./setupJest.js'],
+  reporters: ['default', 'jest-junit'],
 };

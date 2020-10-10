@@ -17,3 +17,6 @@ dist
 
 # CircleCI local config
 .circleci/local.yml
+
+# Test results
+junit.xml
