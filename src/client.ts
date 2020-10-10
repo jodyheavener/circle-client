@@ -174,7 +174,7 @@ export type JobArtifact = {
 export type JobTest = {
   message: string;
   source: string;
-  run_time: string;
+  run_time: number;
   file: string;
   result: string;
   name: string;
