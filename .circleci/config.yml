@@ -23,7 +23,7 @@ jobs:
             - ~/.cache/yarn
       - run: yarn test
       - store_test_results:
-          path: ~/
+          path: artifacts/tests
 
 workflows:
   build_and_test:
