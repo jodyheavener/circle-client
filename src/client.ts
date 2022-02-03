@@ -315,12 +315,12 @@ class CircleCI {
     this.headers = headers;
   }
 
-  private async request(
+  private async request<TData = { [value: string]: any }>(
     method: HTTPMethod,
     path: string,
     successStatus: number,
     params?: Params
-  ): Promise<{ [value: string]: any }> {
+  ): Promise<TData> {
     let fullPath = `${CircleCI.baseUrl}/${path}`;
     let body: string | undefined = undefined;
     const headers: Headers = Object.assign(this.headers, {
@@ -356,7 +356,7 @@ class CircleCI {
       );
     }
 
-    return data as { [value: string]: any };
+    return data as TData;
   }
 
   private previewWarn(): void {
@@ -386,13 +386,11 @@ class CircleCI {
    * Retrieves a project by project slug.
    */
   async getProject(): Promise<Project> {
-    const data = await this.request(
+    return await this.request<Project>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}`,
       200
     );
-
-    return data as Project;
   }
 
   /**
@@ -408,14 +406,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<CheckoutKey>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/checkout-key`,
       200,
       params
     );
-
-    return data as Paged<CheckoutKey>;
   }
 
   /**
@@ -424,14 +420,12 @@ class CircleCI {
   async createCheckoutKey(
     type: 'user-key' | 'deploy-key'
   ): Promise<CheckoutKey> {
-    const data = await this.request(
+    return await this.request<CheckoutKey>(
       HTTPMethod.Post,
       `project/${this.getProjectSlug()}/checkout-key`,
       201,
       { type }
     );
-
-    return data as CheckoutKey;
   }
 
   /**
@@ -449,13 +443,11 @@ class CircleCI {
    * Returns an individual checkout key.
    */
   async getCheckoutKey(fingerprint: string): Promise<CheckoutKey> {
-    const data = await this.request(
+    return await this.request<CheckoutKey>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/checkout-key/${fingerprint}`,
       200
     );
-
-    return data as CheckoutKey;
   }
 
   /**
@@ -471,34 +463,30 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<EnvVar>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/envvar`,
       200,
       params
     );
-
-    return data as Paged<EnvVar>;
   }
 
   /**
    * Returns the masked value of an environment variable.
    */
   async getEnvVar(name: string): Promise<EnvVar> {
-    const data = await this.request(
+    return await this.request<EnvVar>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/envvar/${encodeURIComponent(name)}`,
       200
     );
-
-    return data as EnvVar;
   }
 
   /**
    * Creates a new environment variable.
    */
   async createEnvVar(name: string, value: string): Promise<EnvVar> {
-    const data = await this.request(
+    return await this.request<EnvVar>(
       HTTPMethod.Post,
       `project/${this.getProjectSlug()}/envvar`,
       201,
@@ -507,8 +495,6 @@ class CircleCI {
         value,
       }
     );
-
-    return data as EnvVar;
   }
 
   /**
@@ -526,13 +512,11 @@ class CircleCI {
    * Returns summary fields of a workflow by ID.
    */
   async getWorkflow(id: string): Promise<Workflow> {
-    const data = await this.request(
+    return await this.request<Workflow>(
       HTTPMethod.Get,
       `workflow/${encodeURIComponent(id)}`,
       200
     );
-
-    return data as Workflow;
   }
 
   /**
@@ -601,14 +585,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<Job>>(
       HTTPMethod.Get,
       `workflow/${encodeURIComponent(id)}/job`,
       200,
       params
     );
-
-    return data as Paged<Job>;
   }
 
   /**
@@ -629,14 +611,12 @@ class CircleCI {
       params['branch'] = branch || this.branch;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<SummaryMetrics>>(
       HTTPMethod.Get,
       `insights/${this.getProjectSlug()}/workflows`,
       200,
       params
     );
-
-    return data as Paged<SummaryMetrics>;
   }
 
   /**
@@ -660,14 +640,12 @@ class CircleCI {
       params['branch'] = branch || this.branch;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<SummaryMetrics>>(
       HTTPMethod.Get,
       `insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs`,
       200,
       params
     );
-
-    return data as Paged<SummaryMetrics>;
   }
 
   /**
@@ -701,14 +679,12 @@ class CircleCI {
       params['end-date'] = endDate;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<WorkflowRun>>(
       HTTPMethod.Get,
       `insights/${this.getProjectSlug()}/workflows/${workflowName}`,
       200,
       params
     );
-
-    return data as Paged<WorkflowRun>;
   }
 
   /**
@@ -743,14 +719,12 @@ class CircleCI {
       params['end-date'] = endDate;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<WorkflowRun>>(
       HTTPMethod.Get,
       `insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs/${jobName}`,
       200,
       params
     );
-
-    return data as Paged<WorkflowRun>;
   }
 
   /**
@@ -777,35 +751,34 @@ class CircleCI {
       params['mine'] = onlyMine;
     }
 
-    const data = await this.request(HTTPMethod.Get, `pipeline`, 200, params);
-
-    return data as Paged<Pipeline>;
+    return await this.request<Paged<Pipeline>>(
+      HTTPMethod.Get,
+      `pipeline`,
+      200,
+      params
+    );
   }
 
   /**
    * Returns a pipeline by ID.
    */
   async getPipeline(pipelineId: string): Promise<Pipeline> {
-    const data = await this.request(
+    return await this.request<Pipeline>(
       HTTPMethod.Get,
       `pipeline/${pipelineId}`,
       200
     );
-
-    return data as Pipeline;
   }
 
   /**
    * Returns a pipeline's configuration by ID.
    */
   async getPipelineConfig(pipelineId: string): Promise<PipelineConfig> {
-    const data = await this.request(
+    return await this.request<PipelineConfig>(
       HTTPMethod.Get,
       `pipeline/${pipelineId}/config`,
       200
     );
-
-    return data as PipelineConfig;
   }
 
   /**
@@ -824,14 +797,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<Workflow>>(
       HTTPMethod.Get,
       `pipeline/${pipelineId}/workflow`,
       200,
       params
     );
-
-    return data as Paged<Workflow>;
   }
 
   /**
@@ -857,14 +828,12 @@ class CircleCI {
       params['parameters'] = parameters;
     }
 
-    const data = await this.request(
+    return await this.request<PipelineConfig>(
       HTTPMethod.Post,
       `project/${this.getProjectSlug()}/pipeline`,
       201,
       params
     );
-
-    return data as PipelineConfig;
   }
 
   /**
@@ -885,14 +854,12 @@ class CircleCI {
       params['branch'] = branch || this.branch;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/pipeline`,
       200,
       params
     );
-
-    return data as Paged<Pipeline>;
   }
 
   /**
@@ -909,27 +876,23 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/pipeline/mine`,
       200,
       params
     );
-
-    return data as Paged<Pipeline>;
   }
 
   /**
    * Returns a pipeline by number.
    */
   async getProjectPipeline(pipelineNumber: string | number): Promise<Pipeline> {
-    const data = await this.request(
+    return await this.request<Pipeline>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/pipeline/${pipelineNumber}`,
       200
     );
-
-    return data as Pipeline;
   }
 
   /**
@@ -938,13 +901,11 @@ class CircleCI {
   async getJob(jobNumber: string | number): Promise<JobDetail> {
     this.previewWarn();
 
-    const data = await this.request(
+    return await this.request<JobDetail>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/job/${jobNumber}`,
       200
     );
-
-    return data as JobDetail;
   }
 
   /**
@@ -978,14 +939,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<JobArtifact>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/${jobNumber}/artifacts`,
       200,
       params
     );
-
-    return data as Paged<JobArtifact>;
   }
 
   /**
@@ -1006,14 +965,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<JobTest>>(
       HTTPMethod.Get,
       `project/${this.getProjectSlug()}/${jobNumber}/tests`,
       200,
       params
     );
-
-    return data as Paged<JobTest>;
   }
 
   /**
@@ -1022,9 +979,7 @@ class CircleCI {
   async getMe(): Promise<User> {
     this.previewWarn();
 
-    const data = await this.request(HTTPMethod.Get, `me`, 200);
-
-    return data as User;
+    return await this.request<User>(HTTPMethod.Get, `me`, 200);
   }
 
   /**
@@ -1034,9 +989,11 @@ class CircleCI {
   async getCollaborations(): Promise<Collaboration[]> {
     this.previewWarn();
 
-    const data = await this.request(HTTPMethod.Get, `me/collaborations`, 200);
-
-    return data as Collaboration[];
+    return await this.request<Collaboration[]>(
+      HTTPMethod.Get,
+      `me/collaborations`,
+      200
+    );
   }
 
   /**
@@ -1045,9 +1002,7 @@ class CircleCI {
   async getUser(userId: string): Promise<User> {
     this.previewWarn();
 
-    const data = await this.request(HTTPMethod.Get, `user/${userId}`, 200);
-
-    return data as User;
+    return await this.request<User>(HTTPMethod.Get, `user/${userId}`, 200);
   }
 
   /**
@@ -1082,9 +1037,12 @@ class CircleCI {
       params['owner-type'] = ownerType;
     }
 
-    const data = await this.request(HTTPMethod.Get, `context`, 200, params);
-
-    return data as Paged<Context>;
+    return await this.request<Paged<Context>>(
+      HTTPMethod.Get,
+      `context`,
+      200,
+      params
+    );
   }
 
   /**
@@ -1094,12 +1052,10 @@ class CircleCI {
     name: string,
     owner: { id: string; type?: 'account' | 'organization' }
   ): Promise<Context> {
-    const data = await this.request(HTTPMethod.Post, `context`, 200, {
+    return await this.request<Context>(HTTPMethod.Post, `context`, 200, {
       name,
       owner,
     });
-
-    return data as Context;
   }
 
   /**
@@ -1113,13 +1069,11 @@ class CircleCI {
    * Returns basic information about a context.
    */
   async getContext(contextId: string): Promise<Context> {
-    const data = await this.request(
+    return await this.request<Context>(
       HTTPMethod.Get,
       `context/${contextId}`,
       200
     );
-
-    return data as Context;
   }
 
   /**
@@ -1139,14 +1093,12 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
 
-    const data = await this.request(
+    return await this.request<Paged<ContextEnvVar>>(
       HTTPMethod.Get,
       `context/${contextId}/environment-variable`,
       200,
       params
     );
-
-    return data as Paged<ContextEnvVar>;
   }
 
   /**
@@ -1157,7 +1109,7 @@ class CircleCI {
     name: string,
     value: string
   ): Promise<EnvVar> {
-    const data = await this.request(
+    return await this.request<EnvVar>(
       HTTPMethod.Put,
       `context/${contextId}/environment-variable/${name}`,
       200,
@@ -1165,8 +1117,6 @@ class CircleCI {
         value,
       }
     );
-
-    return data as EnvVar;
   }
 
   /**
