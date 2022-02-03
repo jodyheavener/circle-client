@@ -250,7 +250,7 @@ export type User = {
 };
 
 export type Collaboration = {
-  'vcs-type': string;
+  vcs_type: string;
   name: string;
   avatar_url: string;
 };
