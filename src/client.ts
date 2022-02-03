@@ -359,13 +359,13 @@ class CircleCI {
     return data as TData;
   }
 
-  private previewWarn(): void {
+  private previewWarn(method: string): void {
     if (this.previewWarned) {
       return;
     }
 
     console.warn(
-      '⚠️ This is a preview API endpoint that may change at any time.'
+      `⚠️ Method ${method} calls a preview API endpoint that may change at any time.`
     );
     this.previewWarned = true;
   }
@@ -897,9 +897,11 @@ class CircleCI {
 
   /**
    * Returns job details.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async getJob(jobNumber: string | number): Promise<JobDetail> {
-    this.previewWarn();
+    this.previewWarn('getJob');
 
     return await this.request<JobDetail>(
       HTTPMethod.Get,
@@ -910,9 +912,11 @@ class CircleCI {
 
   /**
    * Cancel job with a given job number.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async cancelJob(jobNumber: string | number): Promise<void> {
-    this.previewWarn();
+    this.previewWarn('cancelJob');
 
     await this.request(
       HTTPMethod.Post,
@@ -923,6 +927,8 @@ class CircleCI {
 
   /**
    * Returns a job's artifacts.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async listJobArtifacts(
     jobNumber: string | number,
@@ -932,7 +938,7 @@ class CircleCI {
       pageToken?: string;
     } = {}
   ): Promise<Paged<JobArtifact>> {
-    this.previewWarn();
+    this.previewWarn('listJobArtifacts');
 
     const params: Params = {};
     if (pageToken) {
@@ -949,6 +955,8 @@ class CircleCI {
 
   /**
    * Get test metadata for a build.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async listJobTests(
     jobNumber: string | number,
@@ -958,7 +966,7 @@ class CircleCI {
       pageToken?: string;
     } = {}
   ): Promise<Paged<JobTest>> {
-    this.previewWarn();
+    this.previewWarn('listJobTests');
 
     const params: Params = {};
     if (pageToken) {
@@ -975,9 +983,11 @@ class CircleCI {
 
   /**
    * Information about the user that is currently signed in.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async getMe(): Promise<User> {
-    this.previewWarn();
+    this.previewWarn('getMe');
 
     return await this.request<User>(HTTPMethod.Get, 'me', 200);
   }
@@ -985,9 +995,11 @@ class CircleCI {
   /**
    * Provides the set of organizations of which the currently
    * signed in user is a member or a collaborator.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async getCollaborations(): Promise<Collaboration[]> {
-    this.previewWarn();
+    this.previewWarn('getCollaborations');
 
     return await this.request<Collaboration[]>(
       HTTPMethod.Get,
@@ -998,9 +1010,11 @@ class CircleCI {
 
   /**
    * Information about the user with the given ID.
+   *
+   * This is a preview API endpoint that may change at any time.
    */
   async getUser(userId: string): Promise<User> {
-    this.previewWarn();
+    this.previewWarn('getUser');
 
     return await this.request<User>(HTTPMethod.Get, `user/${userId}`, 200);
   }
