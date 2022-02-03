@@ -5,7 +5,7 @@
   "main": "dist/src/client.js",
   "types": "dist/src/client.d.ts",
   "engines": {
-    "node": ">=12.18.2"
+    "node": ">=14.17.0"
   },
   "author": "Jody Heavener <j.heavener@gmail.com>",
   "license": "MIT",
