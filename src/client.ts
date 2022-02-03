@@ -365,7 +365,7 @@ class CircleCI {
     }
 
     console.warn(
-      'Warning: you are using a preview API endpoint that may change without warning.'
+      '⚠️ This is a preview API endpoint that may change at any time.'
     );
     this.previewWarned = true;
   }
