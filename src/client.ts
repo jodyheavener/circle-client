@@ -1064,8 +1064,6 @@ class CircleCI {
     ownerType?: 'account' | 'organization';
     pageToken?: string;
   }): Promise<Paged<Context>> {
-    this.previewWarn();
-
     if ((!ownerId && !ownerSlug) || (ownerId && ownerSlug)) {
       throw new ArgumentError('One of ownerId or ownerSlug must be supplied');
     }
@@ -1115,8 +1113,6 @@ class CircleCI {
    * Returns basic information about a context.
    */
   async getContext(contextId: string): Promise<Context> {
-    this.previewWarn();
-
     const data = await this.request(
       HTTPMethod.Get,
       `context/${contextId}`,

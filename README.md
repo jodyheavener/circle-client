@@ -25,6 +25,7 @@ const client = new CircleCI(
 ```
 
 Your project slug consists of:
+
 - The VCS provider (either `github` or `bitbucket`)
 - The project's owner (e.g. your username or organization name)
 - The repo name
@@ -36,8 +37,6 @@ Below is a summary list of available methods. Check out the main [client file](.
 **Paginated results**: any method that begins with `list` returns a `Paged<T>` object, with an `items` property containing the API results, and a `next_page_token` property. If `next_page_token` is set, you can use it to call the method again with the `pageToken` argument set to that value to retrieve the next page of results.
 
 #### Context [🔗](https://circleci.com/docs/api/v2/#tag/Context)
-
-🚧 This set of endpoints are listed as Preview and may change without warning.
 
 - `listContexts` - List all contexts for an owner.
 - `createContext` - Create a new context.
