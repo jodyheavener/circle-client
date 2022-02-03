@@ -1,5 +1,5 @@
-import pck from '../package.json';
 import { FetchMock } from 'jest-fetch-mock';
+import pck from '../package.json';
 import CircleCI, {
   APIError,
   ArgumentError,
@@ -26,7 +26,7 @@ const jobNumber = 82;
 const contextId = 'colly-strings';
 
 const fetchMock = fetch as FetchMock;
-function mockFetch(status = 200, body = {}) {
+function mockFetch(status = 200, body = {}): void {
   fetchMock.mockResponseOnce(JSON.stringify(body), { status });
 }
 
@@ -35,7 +35,7 @@ function expectFetch(
   path: string,
   body?: Params,
   headers: { [header: string]: string } = {}
-) {
+): void {
   expect(fetch).toHaveBeenCalledWith(`${CircleCI.baseUrl}/${path}`, {
     method,
     headers: expect.objectContaining(

@@ -323,7 +323,7 @@ class CircleCI {
   ): Promise<{ [value: string]: any }> {
     let fullPath = `${CircleCI.baseUrl}/${path}`;
     let body: string | undefined = undefined;
-    let headers: Headers = Object.assign(this.headers, {
+    const headers: Headers = Object.assign(this.headers, {
       'Circle-Token': this.apiKey,
       'X-Circle-Client': `v${pck.version}`,
     });
@@ -626,7 +626,7 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
 
     const data = await this.request(
@@ -657,7 +657,7 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
 
     const data = await this.request(
@@ -692,7 +692,7 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
     if (startDate) {
       params['start-date'] = startDate;
@@ -734,7 +734,7 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
     if (startDate) {
       params['start-date'] = startDate;
@@ -848,7 +848,7 @@ class CircleCI {
   }): Promise<PipelineConfig> {
     const params: Params = {};
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
     if (tag) {
       params['tag'] = tag;
@@ -882,7 +882,7 @@ class CircleCI {
       params['page-token'] = pageToken;
     }
     if (branch || this.branch) {
-      params['branch'] = branch || this.branch!;
+      params['branch'] = branch || this.branch;
     }
 
     const data = await this.request(
