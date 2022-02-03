@@ -32,8 +32,8 @@
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint src/**/*.ts && prettier --check src/**/*.ts",
     "test": "jest",
-    "types": "tsc --emitDeclarationOnly --declaration --project tsconfig.build.json",
-    "watch": "yarn compile --watch"
+    "types": "tsc --emitDeclarationOnly --declaration --project tsconfig.json",
+    "watch": "npm-run-all --parallel \"compile --watch\" \"types --watch\""
   },
   "dependencies": {
     "isomorphic-fetch": "^3.0.0"
@@ -52,6 +52,7 @@
     "jest": "^27.4.7",
     "jest-fetch-mock": "^3.0.3",
     "jest-junit": "^13.0.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
     "prettier-plugin-organize-imports": "^2.3.4",
     "ts-jest": "^27.1.3",
