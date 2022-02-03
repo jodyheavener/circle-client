@@ -1,12 +1,12 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@3.0.0
-
 jobs:
   test:
     docker:
-      - image: circleci/node:12
+      - image: cimg/node:14.17.0
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - restore_cache:
@@ -26,6 +26,6 @@ jobs:
           path: artifacts/tests
 
 workflows:
-  build_and_test:
+  test:
     jobs:
       - test
