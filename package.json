@@ -29,7 +29,7 @@
   "scripts": {
     "build": "yarn compile --minify && yarn types",
     "compile": "esbuild src/client.ts --bundle --platform=node --outfile=dist/client.js",
-    "format": "prettier --write src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix && prettier --write src/**/*.ts",
     "lint": "eslint src/**/*.ts && prettier --check src/**/*.ts",
     "test": "jest",
     "types": "tsc --emitDeclarationOnly --declaration --project tsconfig.json",

@@ -630,7 +630,7 @@ describe('previews', () => {
     it('constructs request with the correct arguments', async () => {
       mockFetch();
       await client.getMe();
-      expectFetch(HTTPMethod.Get, `me`);
+      expectFetch(HTTPMethod.Get, 'me');
     });
   });
 
@@ -638,7 +638,7 @@ describe('previews', () => {
     it('constructs request with the correct arguments', async () => {
       mockFetch();
       await client.getCollaborations();
-      expectFetch(HTTPMethod.Get, `me/collaborations`);
+      expectFetch(HTTPMethod.Get, 'me/collaborations');
     });
   });
 
@@ -718,7 +718,7 @@ describe('previews', () => {
         id: ownerId,
         type: 'organization',
       });
-      expectFetch(HTTPMethod.Post, `context`, {
+      expectFetch(HTTPMethod.Post, 'context', {
         name: contextName,
         owner: { id: ownerId, type: 'organization' },
       });

@@ -753,7 +753,7 @@ class CircleCI {
 
     return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
-      `pipeline`,
+      'pipeline',
       200,
       params
     );
@@ -979,7 +979,7 @@ class CircleCI {
   async getMe(): Promise<User> {
     this.previewWarn();
 
-    return await this.request<User>(HTTPMethod.Get, `me`, 200);
+    return await this.request<User>(HTTPMethod.Get, 'me', 200);
   }
 
   /**
@@ -991,7 +991,7 @@ class CircleCI {
 
     return await this.request<Collaboration[]>(
       HTTPMethod.Get,
-      `me/collaborations`,
+      'me/collaborations',
       200
     );
   }
@@ -1039,7 +1039,7 @@ class CircleCI {
 
     return await this.request<Paged<Context>>(
       HTTPMethod.Get,
-      `context`,
+      'context',
       200,
       params
     );
@@ -1052,7 +1052,7 @@ class CircleCI {
     name: string,
     owner: { id: string; type?: 'account' | 'organization' }
   ): Promise<Context> {
-    return await this.request<Context>(HTTPMethod.Post, `context`, 200, {
+    return await this.request<Context>(HTTPMethod.Post, 'context', 200, {
       name,
       owner,
     });
