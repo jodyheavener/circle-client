@@ -54,6 +54,10 @@ function expectFetch(
   });
 }
 
+it('should fail for testing purposes', () => {
+  expect(true).toBe(false);
+});
+
 describe('errors', () => {
   describe('ProjectSlugError', () => {
     beforeAll(() => {
