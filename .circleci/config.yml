@@ -24,6 +24,8 @@ jobs:
       - run: yarn test
       - store_test_results:
           path: artifacts/tests
+      - store_artifacts:
+          path: example
 
 workflows:
   test:
