@@ -1,4 +1,7 @@
+import { https } from 'follow-redirects';
+import { createWriteStream } from 'fs';
 import fetch from 'isomorphic-fetch';
+import { join } from 'path';
 import pck from '../package.json';
 
 export enum WorkflowStatus {
@@ -294,9 +297,12 @@ export class APIError extends Error {
 
 type Headers = { [header: string]: string };
 
+export const CIRCLE_CI_URL = 'https://circleci.com';
+export const API_BASE_PATH = '/api/v2';
+
 class CircleCI {
-  static readonly baseUrl: string = 'https://circleci.com/api/v2';
-  private previewWarned = false;
+  private baseUrl: string;
+  private previewWarned: string[] = [];
   private branch?: string;
   private headers: Headers = {};
 
@@ -305,14 +311,21 @@ class CircleCI {
     public projectSlug?: ProjectSlug | string,
     {
       branch,
+      baseUrl = CIRCLE_CI_URL,
       headers = {},
     }: {
       branch?: string;
+      baseUrl?: string;
       headers?: Headers;
     } = {}
   ) {
     this.branch = branch;
-    this.headers = headers;
+    this.baseUrl = baseUrl;
+    this.headers = {
+      ...headers,
+      'Circle-Token': this.apiKey,
+      'X-Circle-Client': `v${pck.version}`,
+    };
   }
 
   private async request<TData = { [value: string]: any }>(
@@ -321,13 +334,8 @@ class CircleCI {
     successStatus: number,
     params?: Params
   ): Promise<TData> {
-    let fullPath = `${CircleCI.baseUrl}/${path}`;
+    let fullPath = `${this.baseUrl}/${API_BASE_PATH}/${path}`;
     let body: string | undefined = undefined;
-    const headers: Headers = Object.assign(this.headers, {
-      'Circle-Token': this.apiKey,
-      'X-Circle-Client': `v${pck.version}`,
-    });
-
     if (params && Object.keys(params).length) {
       if ([HTTPMethod.Get, HTTPMethod.Delete].includes(method)) {
         fullPath += `?${new URLSearchParams(
@@ -337,13 +345,13 @@ class CircleCI {
 
       if ([HTTPMethod.Post, HTTPMethod.Put].includes(method)) {
         body = JSON.stringify(params);
-        headers['Content-Type'] = 'application/json';
+        this.headers['Content-Type'] = 'application/json';
       }
     }
 
     const response = await fetch(fullPath, {
       method,
-      headers,
+      headers: this.headers,
       body,
     });
     const data = await response.json();
@@ -360,14 +368,14 @@ class CircleCI {
   }
 
   private previewWarn(method: string): void {
-    if (this.previewWarned) {
+    if (this.previewWarned.includes(method)) {
       return;
     }
 
     console.warn(
       `⚠️ Method ${method} calls a preview API endpoint that may change at any time.`
     );
-    this.previewWarned = true;
+    this.previewWarned.push(method);
   }
 
   getProjectSlug(): string {
@@ -388,7 +396,7 @@ class CircleCI {
   async getProject(): Promise<Project> {
     return await this.request<Project>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}`,
+      `/project/${this.getProjectSlug()}`,
       200
     );
   }
@@ -408,7 +416,7 @@ class CircleCI {
 
     return await this.request<Paged<CheckoutKey>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/checkout-key`,
+      `/project/${this.getProjectSlug()}/checkout-key`,
       200,
       params
     );
@@ -422,7 +430,7 @@ class CircleCI {
   ): Promise<CheckoutKey> {
     return await this.request<CheckoutKey>(
       HTTPMethod.Post,
-      `project/${this.getProjectSlug()}/checkout-key`,
+      `/project/${this.getProjectSlug()}/checkout-key`,
       201,
       { type }
     );
@@ -434,7 +442,7 @@ class CircleCI {
   async deleteCheckoutKey(fingerprint: string): Promise<void> {
     await this.request(
       HTTPMethod.Delete,
-      `project/${this.getProjectSlug()}/checkout-key/${fingerprint}`,
+      `/project/${this.getProjectSlug()}/checkout-key/${fingerprint}`,
       200
     );
   }
@@ -445,7 +453,7 @@ class CircleCI {
   async getCheckoutKey(fingerprint: string): Promise<CheckoutKey> {
     return await this.request<CheckoutKey>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/checkout-key/${fingerprint}`,
+      `/project/${this.getProjectSlug()}/checkout-key/${fingerprint}`,
       200
     );
   }
@@ -465,7 +473,7 @@ class CircleCI {
 
     return await this.request<Paged<EnvVar>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/envvar`,
+      `/project/${this.getProjectSlug()}/envvar`,
       200,
       params
     );
@@ -477,7 +485,7 @@ class CircleCI {
   async getEnvVar(name: string): Promise<EnvVar> {
     return await this.request<EnvVar>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/envvar/${encodeURIComponent(name)}`,
+      `/project/${this.getProjectSlug()}/envvar/${encodeURIComponent(name)}`,
       200
     );
   }
@@ -488,7 +496,7 @@ class CircleCI {
   async createEnvVar(name: string, value: string): Promise<EnvVar> {
     return await this.request<EnvVar>(
       HTTPMethod.Post,
-      `project/${this.getProjectSlug()}/envvar`,
+      `/project/${this.getProjectSlug()}/envvar`,
       201,
       {
         name,
@@ -503,7 +511,7 @@ class CircleCI {
   async deleteEnvVar(name: string): Promise<void> {
     await this.request(
       HTTPMethod.Delete,
-      `project/${this.getProjectSlug()}/envvar/${encodeURIComponent(name)}`,
+      `/project/${this.getProjectSlug()}/envvar/${encodeURIComponent(name)}`,
       200
     );
   }
@@ -514,7 +522,7 @@ class CircleCI {
   async getWorkflow(id: string): Promise<Workflow> {
     return await this.request<Workflow>(
       HTTPMethod.Get,
-      `workflow/${encodeURIComponent(id)}`,
+      `/workflow/${encodeURIComponent(id)}`,
       200
     );
   }
@@ -525,7 +533,7 @@ class CircleCI {
   async cancelWorkflow(id: string): Promise<void> {
     await this.request(
       HTTPMethod.Post,
-      `workflow/${encodeURIComponent(id)}/cancel`,
+      `/workflow/${encodeURIComponent(id)}/cancel`,
       202
     );
   }
@@ -549,7 +557,7 @@ class CircleCI {
 
     await this.request(
       HTTPMethod.Post,
-      `workflow/${encodeURIComponent(workflowId)}/rerun`,
+      `/workflow/${encodeURIComponent(workflowId)}/rerun`,
       202,
       params
     );
@@ -564,7 +572,7 @@ class CircleCI {
   ): Promise<void> {
     await this.request(
       HTTPMethod.Post,
-      `workflow/${encodeURIComponent(workflowId)}/approve/${requestId}`,
+      `/workflow/${encodeURIComponent(workflowId)}/approve/${requestId}`,
       202
     );
   }
@@ -587,7 +595,7 @@ class CircleCI {
 
     return await this.request<Paged<Job>>(
       HTTPMethod.Get,
-      `workflow/${encodeURIComponent(id)}/job`,
+      `/workflow/${encodeURIComponent(id)}/job`,
       200,
       params
     );
@@ -613,7 +621,7 @@ class CircleCI {
 
     return await this.request<Paged<SummaryMetrics>>(
       HTTPMethod.Get,
-      `insights/${this.getProjectSlug()}/workflows`,
+      `/insights/${this.getProjectSlug()}/workflows`,
       200,
       params
     );
@@ -642,7 +650,7 @@ class CircleCI {
 
     return await this.request<Paged<SummaryMetrics>>(
       HTTPMethod.Get,
-      `insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs`,
+      `/insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs`,
       200,
       params
     );
@@ -681,7 +689,7 @@ class CircleCI {
 
     return await this.request<Paged<WorkflowRun>>(
       HTTPMethod.Get,
-      `insights/${this.getProjectSlug()}/workflows/${workflowName}`,
+      `/insights/${this.getProjectSlug()}/workflows/${workflowName}`,
       200,
       params
     );
@@ -721,7 +729,7 @@ class CircleCI {
 
     return await this.request<Paged<WorkflowRun>>(
       HTTPMethod.Get,
-      `insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs/${jobName}`,
+      `/insights/${this.getProjectSlug()}/workflows/${workflowName}/jobs/${jobName}`,
       200,
       params
     );
@@ -753,7 +761,7 @@ class CircleCI {
 
     return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
-      'pipeline',
+      '/pipeline',
       200,
       params
     );
@@ -765,7 +773,7 @@ class CircleCI {
   async getPipeline(pipelineId: string): Promise<Pipeline> {
     return await this.request<Pipeline>(
       HTTPMethod.Get,
-      `pipeline/${pipelineId}`,
+      `/pipeline/${pipelineId}`,
       200
     );
   }
@@ -776,7 +784,7 @@ class CircleCI {
   async getPipelineConfig(pipelineId: string): Promise<PipelineConfig> {
     return await this.request<PipelineConfig>(
       HTTPMethod.Get,
-      `pipeline/${pipelineId}/config`,
+      `/pipeline/${pipelineId}/config`,
       200
     );
   }
@@ -799,7 +807,7 @@ class CircleCI {
 
     return await this.request<Paged<Workflow>>(
       HTTPMethod.Get,
-      `pipeline/${pipelineId}/workflow`,
+      `/pipeline/${pipelineId}/workflow`,
       200,
       params
     );
@@ -830,7 +838,7 @@ class CircleCI {
 
     return await this.request<PipelineConfig>(
       HTTPMethod.Post,
-      `project/${this.getProjectSlug()}/pipeline`,
+      `/project/${this.getProjectSlug()}/pipeline`,
       201,
       params
     );
@@ -856,7 +864,7 @@ class CircleCI {
 
     return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/pipeline`,
+      `/project/${this.getProjectSlug()}/pipeline`,
       200,
       params
     );
@@ -878,7 +886,7 @@ class CircleCI {
 
     return await this.request<Paged<Pipeline>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/pipeline/mine`,
+      `/project/${this.getProjectSlug()}/pipeline/mine`,
       200,
       params
     );
@@ -890,7 +898,7 @@ class CircleCI {
   async getProjectPipeline(pipelineNumber: string | number): Promise<Pipeline> {
     return await this.request<Pipeline>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/pipeline/${pipelineNumber}`,
+      `/project/${this.getProjectSlug()}/pipeline/${pipelineNumber}`,
       200
     );
   }
@@ -905,7 +913,7 @@ class CircleCI {
 
     return await this.request<JobDetail>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/job/${jobNumber}`,
+      `/project/${this.getProjectSlug()}/job/${jobNumber}`,
       200
     );
   }
@@ -920,7 +928,7 @@ class CircleCI {
 
     await this.request(
       HTTPMethod.Post,
-      `project/${this.getProjectSlug()}/job/${jobNumber}/cancel`,
+      `/project/${this.getProjectSlug()}/job/${jobNumber}/cancel`,
       202
     );
   }
@@ -947,7 +955,7 @@ class CircleCI {
 
     return await this.request<Paged<JobArtifact>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/${jobNumber}/artifacts`,
+      `/project/${this.getProjectSlug()}/${jobNumber}/artifacts`,
       200,
       params
     );
@@ -975,7 +983,7 @@ class CircleCI {
 
     return await this.request<Paged<JobTest>>(
       HTTPMethod.Get,
-      `project/${this.getProjectSlug()}/${jobNumber}/tests`,
+      `/project/${this.getProjectSlug()}/${jobNumber}/tests`,
       200,
       params
     );
@@ -989,7 +997,7 @@ class CircleCI {
   async getMe(): Promise<User> {
     this.previewWarn('getMe');
 
-    return await this.request<User>(HTTPMethod.Get, 'me', 200);
+    return await this.request<User>(HTTPMethod.Get, '/me', 200);
   }
 
   /**
@@ -1003,7 +1011,7 @@ class CircleCI {
 
     return await this.request<Collaboration[]>(
       HTTPMethod.Get,
-      'me/collaborations',
+      '/me/collaborations',
       200
     );
   }
@@ -1016,7 +1024,7 @@ class CircleCI {
   async getUser(userId: string): Promise<User> {
     this.previewWarn('getUser');
 
-    return await this.request<User>(HTTPMethod.Get, `user/${userId}`, 200);
+    return await this.request<User>(HTTPMethod.Get, `/user/${userId}`, 200);
   }
 
   /**
@@ -1053,7 +1061,7 @@ class CircleCI {
 
     return await this.request<Paged<Context>>(
       HTTPMethod.Get,
-      'context',
+      '/context',
       200,
       params
     );
@@ -1066,7 +1074,7 @@ class CircleCI {
     name: string,
     owner: { id: string; type?: 'account' | 'organization' }
   ): Promise<Context> {
-    return await this.request<Context>(HTTPMethod.Post, 'context', 200, {
+    return await this.request<Context>(HTTPMethod.Post, '/context', 200, {
       name,
       owner,
     });
@@ -1076,7 +1084,7 @@ class CircleCI {
    * Delete a context.
    */
   async deleteContext(contextId: string): Promise<void> {
-    await this.request(HTTPMethod.Delete, `context/${contextId}`, 200);
+    await this.request(HTTPMethod.Delete, `/context/${contextId}`, 200);
   }
 
   /**
@@ -1085,7 +1093,7 @@ class CircleCI {
   async getContext(contextId: string): Promise<Context> {
     return await this.request<Context>(
       HTTPMethod.Get,
-      `context/${contextId}`,
+      `/context/${contextId}`,
       200
     );
   }
@@ -1109,7 +1117,7 @@ class CircleCI {
 
     return await this.request<Paged<ContextEnvVar>>(
       HTTPMethod.Get,
-      `context/${contextId}/environment-variable`,
+      `/context/${contextId}/environment-variable`,
       200,
       params
     );
@@ -1125,7 +1133,7 @@ class CircleCI {
   ): Promise<EnvVar> {
     return await this.request<EnvVar>(
       HTTPMethod.Put,
-      `context/${contextId}/environment-variable/${name}`,
+      `/context/${contextId}/environment-variable/${name}`,
       200,
       {
         value,
@@ -1139,9 +1147,35 @@ class CircleCI {
   async deleteContextEnvVar(contextId: string, name: string): Promise<void> {
     await this.request(
       HTTPMethod.Delete,
-      `context/${contextId}/environment-variable/${name}`,
+      `/context/${contextId}/environment-variable/${name}`,
       200
     );
+  }
+
+  /**
+   * Download a job artifact and save it to disk.
+   */
+  async downloadArtifact(
+    artifact: JobArtifact | string,
+    location?: string
+  ): Promise<void> {
+    const url = typeof artifact === 'string' ? artifact : artifact.url;
+    location = location || join(process.cwd(), url.split('/').pop()!);
+    return new Promise((resolve, reject) => {
+      https
+        .get(
+          url,
+          {
+            headers: this.headers,
+          },
+          response =>
+            response
+              .on('end', resolve)
+              .on('finish', resolve)
+              .pipe(createWriteStream(location!))
+        )
+        .on('error', error => reject(error));
+    });
   }
 }
 
