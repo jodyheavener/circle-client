@@ -39,7 +39,7 @@ function expectFetch(
   headers: { [header: string]: string } = {}
 ): void {
   expect(fetch).toHaveBeenCalledWith(
-    `${CIRCLE_CI_URL}/${API_BASE_PATH}/${path}`,
+    `${CIRCLE_CI_URL}${API_BASE_PATH}${path}`,
     {
       method,
       headers: expect.objectContaining(

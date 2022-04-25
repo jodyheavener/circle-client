@@ -337,7 +337,7 @@ class CircleCI {
     successStatus: number,
     params?: Params
   ): Promise<TData> {
-    let fullPath = `${this.baseUrl}/${API_BASE_PATH}/${path}`;
+    let fullPath = `${this.baseUrl}${API_BASE_PATH}${path}`;
     let body: string | undefined = undefined;
     if (params && Object.keys(params).length) {
       if ([HTTPMethod.Get, HTTPMethod.Delete].includes(method)) {
@@ -386,9 +386,9 @@ class CircleCI {
       throw new ProjectSlugError();
     }
 
-    return encodeURIComponent(
-      Array.isArray(this.slug) ? this.slug.join('/') : this.slug
-    );
+    return Array.isArray(this.slug)
+      ? this.slug.map(encodeURIComponent).join('/')
+      : encodeURIComponent(this.slug);
   }
 
   /**
