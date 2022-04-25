@@ -12,8 +12,8 @@ import CircleCI, {
 } from './client';
 
 const apiKey = 'supposed to be';
-const projectSlug = ['github', 'example', 'repo'] as ProjectSlug;
-const client = new CircleCI(apiKey, projectSlug);
+const slug = ['github', 'example', 'repo'] as ProjectSlug;
+const client = new CircleCI(apiKey, { slug });
 const pageToken = 'forest-whitaker';
 const envVarName = 'every-stone';
 const envVarValue = 'trees';
@@ -62,11 +62,11 @@ function expectFetch(
 describe('errors', () => {
   describe('ProjectSlugError', () => {
     beforeAll(() => {
-      client.projectSlug = undefined;
+      client.slug = undefined;
     });
 
     afterAll(() => {
-      client.projectSlug = projectSlug;
+      client.slug = slug;
     });
 
     it('throws with no project slug set and a method that requires one is called', () => {

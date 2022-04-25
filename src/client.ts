@@ -301,24 +301,27 @@ export const CIRCLE_CI_URL = 'https://circleci.com';
 export const API_BASE_PATH = '/api/v2';
 
 class CircleCI {
+  public slug?: ProjectSlug | string;
+  public branch?: string;
   private baseUrl: string;
   private previewWarned: string[] = [];
-  private branch?: string;
   private headers: Headers = {};
 
   constructor(
     private readonly apiKey: string,
-    public projectSlug?: ProjectSlug | string,
     {
+      slug,
       branch,
       baseUrl = CIRCLE_CI_URL,
       headers = {},
     }: {
+      slug?: ProjectSlug | string;
       branch?: string;
       baseUrl?: string;
       headers?: Headers;
     } = {}
   ) {
+    this.slug = slug;
     this.branch = branch;
     this.baseUrl = baseUrl;
     this.headers = {
@@ -379,14 +382,12 @@ class CircleCI {
   }
 
   getProjectSlug(): string {
-    if (!this.projectSlug) {
+    if (!this.slug) {
       throw new ProjectSlugError();
     }
 
     return encodeURIComponent(
-      Array.isArray(this.projectSlug)
-        ? this.projectSlug.join('/')
-        : this.projectSlug
+      Array.isArray(this.slug) ? this.slug.join('/') : this.slug
     );
   }
 

@@ -13,15 +13,12 @@ Then all you need to do is import the client class and instantiate it with your 
 ```ts
 import CircleCI from 'circle-client';
 
-const client = new CircleCI(
-  '2c818264d2557cd14b9fc3fa538df6ecbc6489f3',
+const client = new CircleCI('2c818264d2557cd14b9fc3fa538df6ecbc6489f3', {
   // this could also be "github/owner/repo"
-  ['github', 'owner', 'repo'],
-  {
-    // methods that take a branch arg can override this
-    branch: 'main',
-  }
-);
+  slug: ['github', 'owner', 'repo'],
+  // methods that take a branch arg can override this
+  branch: 'main',
+});
 ```
 
 Your project slug consists of:
@@ -99,6 +96,10 @@ Below is a summary list of available methods. Check out the main [client file](.
 - `createEnvVar` - Creates a new environment variable.
 - `deleteEnvVar` - Deletes the environment variable named.
 - `getEnvVar` - Returns the masked value of an environment variable.
+
+#### Other
+
+- `downloadArtifact` - Download a job artifact and save it to disk.
 
 ### Errors
 
