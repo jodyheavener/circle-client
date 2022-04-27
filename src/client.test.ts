@@ -46,6 +46,7 @@ function expectFetch(
         Object.assign(
           {
             'Circle-Token': apiKey,
+            'User-Agent': `jodyheavener/circle-client (v${pck.version})`,
             'X-Circle-Client': `v${pck.version}`,
           },
           [HTTPMethod.Post, HTTPMethod.Put].includes(method) && body

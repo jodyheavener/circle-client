@@ -327,6 +327,7 @@ class CircleCI {
     this.headers = {
       ...headers,
       'Circle-Token': this.apiKey,
+      'User-Agent': `jodyheavener/circle-client (v${pck.version})`,
       'X-Circle-Client': `v${pck.version}`,
     };
   }
